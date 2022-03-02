@@ -1,9 +1,10 @@
 '''
 1)  Write 2 functions: parseDate and parseTime 
+
     parseDate() will take a string as argument representing a date  
     and will convert it (if possible) into a datetime.date object
     The accepted format could be: dd/mm/yyyy and dd/mm/yy (in this case we 
-    assume it is a year of the 21th century)
+    assume yy is a year of the 21th century)
     Ex: 31/05/2019 or 31/05/19
     
     parseTime() will take a string as argument representing a time and will convert 
@@ -38,23 +39,43 @@ class ParseTimeError(Exception):
 class ParseFloatError(Exception):
     pass 
 
+def isDate(inputText):
+    reg=re.compile(r"""^          # beginning of the string
+                       ([0-3]\d)  # the day
+                       /
+                       ([01]\d)   # the month
+                       /
+                       (\d\d|\d{4}) # the year
+                       $            # end of the string
+                       """, re.VERBOSE)
+    
+    mo=reg.search(inputText)
+    return bool(mo)
+    
+def isTime(inputText):
+    reg=re.compile(r"^([0-2]\d)[H:]([0-5]\d)([M:]([0-5]\d))?$", re.IGNORECASE)
+    mo=reg.search(inputText)
+    return bool(mo) 
+
+def isFloat(inputText):
+    reg=re.compile(r"^[+-]?(\d|[1-9]\d+)\.\d*$") 
+    mo=reg.search(inputText)
+    return bool(mo)
+        
 def parseDate(inputText):
     """
 
     Parameters
     ----------
-    inputText : TYPE
-        DESCRIPTION.
+    inputText : a string representing a date
 
     Raises
     ------
-    ParseDateError
-        DESCRIPTION.
+    ParseDateError if the argument received is not a valid date
 
     Returns
     -------
-    TYPE
-        DESCRIPTION.
+    A date object (constructed with the help of the argument received)
 
     """
     reg=re.compile(r"""^          # beginning of the string
@@ -76,10 +97,11 @@ def parseDate(inputText):
         raise ParseDateError(f"Bad date format: {inputText}") # >= 3.6
     
 def parseTime(inputText):
-    reg=re.compile(r"^([0-2]\d)[H:]([0-5]\d)([M:]([0-5]\d))?$", re.IGNORECASE)
+    
+    reg=re.compile(r"^([0-2]\d)[H:]([0-5]\d)(?:[M:]([0-5]\d))?$", re.IGNORECASE)
     mo=reg.search(inputText)
     if mo:
-        hh,mm,__,sec=mo.groups()
+        hh,mm,sec=mo.groups()
         if sec==None: sec=0
         return dt.time(int(hh), int(mm), int(sec))
     else:
